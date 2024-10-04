@@ -1,0 +1,60 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome file</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><h1 id="blackarch-linux-conflict-fixes">Blackarch-linux-conflict-fixes</h1>
+<h2 id="scripts-and-fixes-for-resolving-common--package-conflicts-in-blackarch-linux-after-installation">Scripts and fixes for resolving common  package conflicts in BlackArch Linux after installation:</h2>
+<h2 id="conflict">1- conflict:</h2>
+<ul>
+<li><code>jre-openjdk</code></li>
+<li><code>jre-openjdk-headless</code></li>
+<li><code>jdk-openjdk</code></li>
+</ul>
+<p><strong><strong>1-</strong> Run the following command to create a list of the installed packages that depend on the       conflicting Java packages. This will help you reinstall them after resolving the conflicts:</strong></p>
+<pre><code> pacman -Qi jre11-openjdk jre17-openjdk jdk11-openjdk jdk17-openjdk
+ jre11-openjdk-headless jre17-openjdk-headless &gt; ~/java-dependents.txt
+</code></pre>
+<p><strong>2- You can now remove the conflicting packages forcefully using the <code>-Rdd</code> option to bypass dependency checks. This may cause dependent packages to stop working temporarily, but we’ll reinstall them after resolving the conflicts.</strong></p>
+<pre><code> sudo pacman -Rdd jre11-openjdk jre17-openjdk jdk11-openjdk jdk17-openjdk jre11-openjdk-headless jre17-openjdk-headless
+</code></pre>
+<p><strong>3- Install the latest <code>jdk-openjdk</code> package to resolve the conflict:</strong></p>
+<pre><code>sudo pacman -S jdk-openjdk
+</code></pre>
+<p><strong>4- Reinstall the packages that were relying on the removed Java runtime versions. You can do this by checking the `java-dependents.txt</strong></p>
+<pre><code>sudo pacman -S $(grep "Required By" ~/java-dependents.txt | awk '{print $3}')
+</code></pre>
+<p><strong>This process should remove the conflicts while allowing you to restore the Java-dependent packages afterward.</strong></p>
+<h2 id="conflict-1">2- conflict:</h2>
+<blockquote>
+<p><strong>&gt; error: failed to commit transaction (conflicting files) uvicorn: &gt; /usr/bin/uvicorn exists in filesystem (owned by python-uvicorn)</strong></p>
+</blockquote>
+<p><strong>1- If you can afford to remove <code>python-uvicorn</code> temporarily, you can uninstall it, upgrade your system, and then reinstall <code>python-uvicorn</code> afterward</strong></p>
+<pre><code>sudo pacman -Rns python-uvicorn sudo pacman -Syu sudo pacman -S python-uvicorn
+</code></pre>
+<p><strong>This method clears the conflict by removing <code>python-uvicorn</code>, upgrading the rest of the system, and then reinstalling the required packages.</strong></p>
+<blockquote>
+<p>error: failed to prepare transaction (could not satisfy dependencies)<br>
+:: removing python-uvicorn breaks dependency ‘python-uvicorn’</p>
+</blockquote>
+<p><strong>2- This will create a list of all installed packages related to <code>python-uvicorn</code>, allowing you to reinstall them later.</strong></p>
+<pre><code>pacman -Qi python-uvicorn | grep "Required By" | sed 's/Required By : //g' | tr ' ' '\n' &gt; uvicorn-dependent-packages.txt
+</code></pre>
+<p><strong>3- This command will forcefully remove all packages listed in the file without considering dependencies (<code>-Rdd</code>).</strong></p>
+<pre><code>sudo pacman -Rdd $(cat uvicorn-dependent-packages.txt) python-uvicorn
+</code></pre>
+<p><strong>This approach removes all packages relying on <code>theHarvester</code> and <code>python-uvicorn</code>, ensuring that any conflicting dependencies are also removed before reinstalling everything from scratch</strong><br>
+<strong>4- Reinstall the packages that were removed by reading from the backup list:</strong></p>
+<pre><code>sudo pacman -S $(cat uvicorn-dependent-packages.txt) python-uvicorn
+</code></pre>
+<p><strong>With this approach, you’ll first back up the list of dependencies, forcefully remove the packages that depend on <code>python-uvicorn</code>, and finally reinstall everything smoothly.</strong></p>
+</div>
+</body>
+
+</html>
