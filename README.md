@@ -53,6 +53,20 @@
 
 **This approach removes all packages relying on `theHarvester` and `python-uvicorn`, ensuring that any conflicting dependencies are also removed before reinstalling everything from scratch**
 **4- Reinstall the packages that were removed by reading from the backup list:**
+## 3- conflict:
+
+> signature from "Frederik Schwan <frederik.schwan@linux.com>" is
+> unknown trust
+error: failed to commit transaction (invalid or corrupted package (PGP signature))
+
+**1- install arch linux keyring :**
+
+    sudo pacman -Syu archlinux-keyring
+    sudo pacman -S archlinux-keyring
+**2- **Refresh the PGP Keyring:** Update the package manager's PGP keyring to ensure all signatures are valid :**
+
+    sudo pacman-key --init 
+    sudo pacman-key --populate archlinux
 
     sudo pacman -S $(cat uvicorn-dependent-packages.txt) python-uvicorn
     
