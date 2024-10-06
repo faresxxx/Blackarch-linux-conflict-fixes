@@ -53,6 +53,11 @@
 
 **This approach removes all packages relying on `theHarvester` and `python-uvicorn`, ensuring that any conflicting dependencies are also removed before reinstalling everything from scratch**
 **4- Reinstall the packages that were removed by reading from the backup list:**
+
+    sudo pacman -S $(cat uvicorn-dependent-packages.txt) python-uvicorn
+    
+**With this approach, you'll first back up the list of dependencies, forcefully remove the packages that depend on `python-uvicorn`, and finally reinstall everything smoothly.**
+
 ## 3- conflict:
 
 > signature from "Frederik Schwan <frederik.schwan@linux.com>" is
@@ -68,6 +73,3 @@ error: failed to commit transaction (invalid or corrupted package (PGP signature
     sudo pacman-key --init 
     sudo pacman-key --populate archlinux
 
-    sudo pacman -S $(cat uvicorn-dependent-packages.txt) python-uvicorn
-    
-**With this approach, you'll first back up the list of dependencies, forcefully remove the packages that depend on `python-uvicorn`, and finally reinstall everything smoothly.**
